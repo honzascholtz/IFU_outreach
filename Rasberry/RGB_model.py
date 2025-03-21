@@ -32,6 +32,10 @@ class Light_rgb_rot_smooth:
         self.led_blue = PWMLED(25)
         self.led_green = PWMLED(5)
         self.led_red = PWMLED(12)
+
+        self.led_blue2 = PWMLED(13)
+        self.led_green2 = PWMLED(19)
+        self.led_red2 = PWMLED(26)
 		
         self.CounterValue = 0
         self.NextCounterValue = 0
@@ -61,6 +65,9 @@ class Light_rgb_rot_smooth:
 				
             self.led_red.value = self.value_red    # set dc value as the duty cycle
             self.led_blue.value = self.value_blue
+
+            self.led_blue2.value = self.value_red    # set dc value as the duty cycle
+            self.led_red2.value = self.value_blue
 			
             time.sleep(0.01)
 			
@@ -78,9 +85,14 @@ class Light_rgb_rot_binary:
         self.led_blue = PWMLED(25)
         self.led_green = PWMLED(5)
         self.led_red = PWMLED(12)
+
+        self.led_blue2 = PWMLED(13)
+        self.led_green2 = PWMLED(19)
+        self.led_red2 = PWMLED(26)
 		
         self.CounterValue = 0
         self.NextCounterValue = 0
+        self.direction = 0
         self.button = Button(27) # define Button pin according to BCM Numbering 
         self.rotor = RotaryEncoder(17, 18,max_steps=30, wrap=True)# pins 17 and 18, max steps = 30
 	
@@ -92,8 +104,22 @@ class Light_rgb_rot_binary:
         self.value_red = abs(np.sin((self.CounterValue/30)*2*np.pi))
         self.value_blue = abs(-np.cos((self.CounterValue/30)*2*np.pi))
 
+        if 0.5<self.value_red:
+             self.value_red = 1
+        if 0.5<self.value_blue:
+             self.value_blue = 1
+
+        if 0.5>self.value_red:
+             self.value_red = 0
+        if 0.5>self.value_blue:
+             self.value_blue = 0
+
     def reset(self):
         self.CounterValue = 0
+    def clockwise(self):
+         self.direction = 1
+    def anti_clockwise(self):
+        self.direction = 0
 
     def loop(self):
         self.button.when_pressed = self.reset
@@ -104,11 +130,25 @@ class Light_rgb_rot_binary:
                 print('value red = %.2f' % self.value_red + ' value blue = %.2f' % self.value_blue )
                 self.NextCounterValue = self.CounterValue
                 print(self.rotor.steps)
-				
-            self.led_red.value = self.value_red    # set dc value as the duty cycle
-            self.led_blue.value = self.value_blue
+
+            self.rotor.when_rotated_clockwise = self.clockwise
+            self.rotor.when_rotated_counter_clockwise = self.anti_clockwise
+            if self.direction == 0:
+                self.led_red.value = self.value_red    # set dc value as the duty cycle
+                self.led_blue.value = self.value_blue
+
+                self.led_blue2.value = self.value_red    # set dc value as the duty cycle
+                self.led_red2.value = self.value_blue
+
+            if self.direction == 1:
+                self.led_red2.value = self.value_red    # set dc value as the duty cycle
+                self.led_blue2.value = self.value_blue
+
+                self.led_blue.value = self.value_red    # set dc value as the duty cycle
+                self.led_red.value = self.value_blue
+            
 			
-            time.sleep(0.01)
+            time.sleep(0.001)
 			
     def destroy(self):
         self.button.close()    
@@ -124,7 +164,7 @@ if __name__ == '__main__':     # Program start from here
 	print ('Program is starting ... ')
 	
 	try:
-		main = Light_rgb_rot_smooth()
+		main = Light_rgb_rot_binary()
 		main.loop()
 
 	except KeyboardInterrupt:  # When 'Ctrl+C' is pressed, the child program destroy() will be  executed.
