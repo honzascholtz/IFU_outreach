@@ -133,14 +133,14 @@ class Light_rgb_rot_binary:
 
             self.rotor.when_rotated_clockwise = self.clockwise
             self.rotor.when_rotated_counter_clockwise = self.anti_clockwise
-            if self.direction == 0:
+            if self.direction == 1:
                 self.led_red.value = self.value_red    # set dc value as the duty cycle
                 self.led_blue.value = self.value_blue
 
                 self.led_blue2.value = self.value_red    # set dc value as the duty cycle
                 self.led_red2.value = self.value_blue
 
-            if self.direction == 1:
+            if self.direction == 0:
                 self.led_red2.value = self.value_red    # set dc value as the duty cycle
                 self.led_blue2.value = self.value_blue
 
